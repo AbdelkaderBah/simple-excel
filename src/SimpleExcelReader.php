@@ -120,14 +120,34 @@ class SimpleExcelReader
 
         return $this;
     }
+    
+    public function sheetsCount(){
+        $this->reader->open($this->path);
 
-    public function getRows(): LazyCollection
+        $count = iterator_count(
+            $this->reader->getSheetIterator()
+        );
+
+        $this->reader->close();
+
+        return $count;
+    }
+
+    public function getRows(int $sheetIndex): LazyCollection
     {
         $this->reader->open($this->path);
 
         $this->reader->getSheetIterator()->rewind();
+        
+        $iterator = $this->reader->getSheetIterator();
 
-        $sheet = $this->reader->getSheetIterator()->current();
+        if ($sheetIndex > 0) {
+            for ($i = 0; $i < $sheetIndex; $i++) {
+                $iterator->next();
+            }
+        }
+
+        $sheet = $iterator->current();
 
         $this->rowIterator = $sheet->getRowIterator();
 
